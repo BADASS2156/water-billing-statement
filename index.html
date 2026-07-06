@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+    <title>Water Billing System</title>
+
+ 
+
+    <style>
+
+        body {
+
+            font-family: Arial;
+
+            background: #e6f2ff;
+
+        }
+
+ 
+
+        .container {
+
+            width: 350px;
+
+            margin: 50px auto;
+
+            background: white;
+
+            padding: 20px;
+
+        }
+
+ 
+
+        h2 {
+
+            text-align: center;
+
+        }
+
+ 
+
+        input, select {
+
+            width: 100%;
+
+            padding: 8px;
+
+            margin-top: 10px;
+
+        }
+
+ 
+
+        button {
+
+            width: 100%;
+
+            padding: 10px;
+
+            margin-top: 10px;
+
+            background: #007bff;
+
+            color: white;
+
+            border: none;
+
+            cursor: pointer;
+
+        }
+
+ 
+
+        button:hover {
+
+            background: #0056b3;
+
+        }
+
+ 
+
+        .output {
+
+            margin-top: 15px;
+
+            padding: 10px;
+
+            background: #f1f1f1;
+
+        }
+
+ 
+
+        .counter {
+
+            text-align: center;
+
+            margin-top: 10px;
+
+            font-weight: bold;
+
+        }
+
+    </style>
+
+</head>
+
+ 
+
+<body>
+
+ 
+
+<div class="container">
+
+    <h2> Water Billing System</h2>
+
+ 
+
+    <input type="text" id="name" placeholder="Customer Name">
+
+    <input type="number" id="consumption" placeholder="Water Consumption (m³)">
+
+ 
+
+    <select id="type">
+
+        <option value="">Select Customer Type</option>
+
+        <option value="regular">Regular</option>
+
+        <option value="senior">Senior Citizen</option>
+
+        <option value="solo">Solo Parent</option>
+
+    </select>
+
+ 
+
+    <button Bill</button>
+
+    <button Receipt</button>
+
+ 
+
+    <div class="counter">
+
+        Transactions: <span id="count">0</span>
+
+    </div>
+
+ 
+
+    <div class="output" id="output"></div>
+
+</div>
+
+ 
+
+<script>
+
+let count = 0;
+
+ 
+
+function generateBill() {
+
+    let name = document.getElementById("name").value;
+
+    let consumption = parseFloat(document.getElementById("consumption").value);
+
+    let type = document.getElementById("type").value;
+
+ 
+
+    if (name === "" || isNaN(consumption) || type === "") {
+
+        alert("Please fill all fields!");
+
+        return;
+
+    }
+
+ 
+
+    let rate;
+
+    if (consumption <= 20) rate = 25;
+
+    else if (consumption <= 40) rate = 35;
+
+    else if (consumption <= 60) rate = 45;
+
+    else rate = 60;
+
+ 
+
+    let total = consumption * rate;
+
+ 
+
+    let discount = 0;
+
+    if (type === "senior") discount = total * 0.25;
+
+    if (type === "solo") discount = total * 0.15;
+
+ 
+
+    let finalBill = total - discount;
+
+ 
+
+    let date = new Date().toLocaleString();
+
+ 
+
+    document.getElementById("output").innerHTML = `
+
+        <h3> Billing Statement</h3>
+
+        <p>Date: ${date}</p>
+
+        <p>Name: ${name}</p>
+
+        <p>Consumption: ${consumption} m³</p>
+
+        <p>Rate: ₱${rate}</p>
+
+        <p>Total: ₱${total.toFixed(2)}</p>
+
+        <p>Discount: ₱${discount.toFixed(2)}</p>
+
+        <hr>
+
+        <h3>Final Bill: ₱${finalBill.toFixed(2)}</h3>
+
+    `;
+
+ 
+
+    count++;
+
+    document.getElementById("count").textContent = count;
+
+ 
+
+    // Send to Google Sheets
+
+    sendToGoogleSheets(name, consumption, type, finalBill);
+
+}
+
+ 
+
+// Print
+
+function printReceipt() {
+
+    let content = document.getElementById("output").innerHTML;
+
+ 
+
+    if (content === "") {
+
+        alert("Generate bill first!");
+
+        return;
+
+    }
+
+ 
+
+    let win = window.open('', '', 'width=600,height=600');
+
+ 
+
+    win.document.open(); 
+
+    win.document.write(`
+
+        <!DOCTYPE html>
+
+        <html>
+
+        <head>
+
+            <title>Receipt</title>
+
+            <style>
+
+                body { font-family: Arial; padding: 20px; }
+
+                h2 { text-align: center; }
+
+            </style>
+
+        </head>
+
+        <body>
+
+            <h2> Water Billing Receipt</h2>
+
+            ${content}
+
+        </body>
+
+        </html>
+
+    `);
+
+    win.document.close(); 
+
+ 
+
+    win.focus();
+
+    win.print();
+
+}
+
+ 
+
+//  GOOGLE SHEETS
+
+function sendToGoogleSheets(name, consumption, type, bill) {
+
+    const url = "https://script.google.com/macros/s/AKfycbzh-Ns9Bwet9GTFuG5_V40BUOgXh--D9HmyPazDoUCnzWbMLd7_MgOMCxK721wNkhCs7w/exec";
+
+ 
+
+    fetch(url, {
+
+        method: "POST",
+
+        body: JSON.stringify({
+
+            name: name,
+
+            consumption: consumption,
+
+            type: type,
+
+            bill: bill
+
+        }),
+
+        headers: {
+
+            "Content-Type": "application/json"
+
+        }
+
+    }).catch(err => console.log(err));
+
+}
+
+</script>
+
+ 
+
+</body>
+
+</html>
