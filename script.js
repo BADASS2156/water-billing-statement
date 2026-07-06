@@ -88,7 +88,7 @@ function printReceipt() {
 
 // GOOGLE SHEETS
 function sendToGoogleSheets(name, consumption, type, bill) {
-    const url = "https://script.google.com/macros/s/AKfycby1hSEnME_YgcKY_C1A0BPNL5zg3KvOHhpOf8AW5vDSQcWToo4l3QJhspQP8OhQmjaPPQ/exec";
+    const url = "https://script.google.com/macros/s/AKfycbxgfVSoTlV9qfBoAhtiiAqnnS9t0SbvEt0GvbfQqR5LsmwIdhYcSuFf57jcDy4Jte3dZw/exec";
 
     fetch(url, {
         method: "POST",
